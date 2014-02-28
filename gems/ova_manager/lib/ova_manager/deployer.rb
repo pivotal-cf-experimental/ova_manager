@@ -35,8 +35,7 @@ module OvaManager
     def check_vm_status(ova_config)
       log("Checking for existing VM") do
         ip = ova_config[:ip]
-        raise "VM exists at #{ip}" \
-        if system("ping -c 5 #{ip}")
+        raise "VM exists at #{ip}" if system("ping -c 5 #{ip}")
       end
     end
 
@@ -49,8 +48,7 @@ module OvaManager
     end
 
     def obtain_ovf_path(dir)
-      raise "Failed to find ovf" \
-      unless file_path = Dir["#{dir}/*.ovf"].first
+      raise "Failed to find ovf" unless file_path = Dir["#{dir}/*.ovf"].first
       "file://#{file_path}"
     end
 
