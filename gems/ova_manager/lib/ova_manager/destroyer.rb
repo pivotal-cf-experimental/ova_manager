@@ -15,7 +15,7 @@ module OvaManager
     private
 
     def vm_folder_client
-      @vm_folder_client ||= VsphereClients::VmFolderClient.new(datacenter)
+      @vm_folder_client ||= VsphereClients::VmFolderClient.new(datacenter, Logger.new(STDERR))
     end
 
     def datacenter
