@@ -1,3 +1,4 @@
+require "rbvmomi"
 require "vm_folder_client"
 
 module OvaManager
