@@ -1,4 +1,4 @@
-require "vsphere_clients"
+require "vm_folder_client"
 
 module OvaManager
   class Destroyer

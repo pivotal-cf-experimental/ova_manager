@@ -2,7 +2,7 @@ require "tmpdir"
 require "fileutils"
 require "rbvmomi"
 require "rbvmomi/utils/deploy"
-require "ova_manager/open_monkey_patch"
+require "open_monkey_patch"
 
 module OvaManager
   class Deployer
