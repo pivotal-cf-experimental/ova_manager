@@ -12,18 +12,18 @@ describe OvaManager::Destroyer do
       datacenter = double("datacenter")
       vm_folder_client = double("vm_folder_client")
 
-      RbVmomi::VIM.should_receive(:connect).with(
+      expect(RbVmomi::VIM).to receive(:connect).with(
         host: "host",
         user: "user",
         password: "password",
         ssl: true,
         insecure: true,
       ).and_return(connection)
-      connection.serviceInstance.should_receive(:find_datacenter).with("datacenter_name").and_return(datacenter)
-      VsphereClients::VmFolderClient.should_receive(:new).with(datacenter, instance_of(Logger)).and_return(vm_folder_client)
+      expect(connection.serviceInstance).to receive(:find_datacenter).with("datacenter_name").and_return(datacenter)
+      expect(VsphereClients::VmFolderClient).to receive(:new).with(datacenter, instance_of(Logger)).and_return(vm_folder_client)
 
-      vm_folder_client.should_receive(:delete_folder).with("folder_name")
-      vm_folder_client.should_receive(:create_folder).with("folder_name")
+      expect(vm_folder_client).to receive(:delete_folder).with("folder_name")
+      expect(vm_folder_client).to receive(:create_folder).with("folder_name")
 
       destroyer.clean_folder("folder_name")
     end
