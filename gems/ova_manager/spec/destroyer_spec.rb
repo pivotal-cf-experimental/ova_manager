@@ -6,7 +6,6 @@ describe OvaManager::Destroyer do
   let(:vcenter) { { host: "host", user: "user", password: "password" } }
 
   describe "#clean_folder" do
-
     # Crappy temporary test to at least ensure that Destroyer requires the appropriate files
     it "is wired up correctly" do
       connection = double("connection", serviceInstance: double("serviceInstance"))

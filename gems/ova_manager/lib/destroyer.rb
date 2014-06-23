@@ -1,6 +1,6 @@
 require "rbvmomi"
 require "logger"
-require "vm_folder_client"
+require "vsphere_clients/vm_folder_client"
 
 module OvaManager
   class Destroyer
