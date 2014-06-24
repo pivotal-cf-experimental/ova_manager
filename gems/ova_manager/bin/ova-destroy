@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+require "ova_manager/destroyer"
+
+if __FILE__ ==  $0
+  %w(
+    OVA_DEPLOYER_VCENTER_CREDS_IP
+    OVA_DEPLOYER_VCENTER_CREDS_USER
+    OVA_DEPLOYER_VCENTER_CREDS_PASSWORD
+    OVA_DEPLOYER_OVA_IP
+  ).each do |env_variable|
+    raise "Missing ENV variable #{env_variable}" unless ENV[env_variable]
+  end
+
+  OvaManager::Destroyer.new(
+    ENV["OVA_DEPLOYER_VSPHERE_DATACENTER"],
+    {
+      host: ENV["OVA_DEPLOYER_VCENTER_CREDS_IP"],
+      user: ENV["OVA_DEPLOYER_VCENTER_CREDS_USER"],
+      password: ENV["OVA_DEPLOYER_VCENTER_CREDS_PASSWORD"],
+    }
+  ).clean_folder(ENV["OVA_DEPLOYER_VSPHERE_FOLDER"])
+end

@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+require "ova_manager/deployer"
+
+if __FILE__ ==  $0
+  %w(
+    OVA_DEPLOYER_VCENTER_CREDS_IP
+    OVA_DEPLOYER_VCENTER_CREDS_USER
+    OVA_DEPLOYER_VCENTER_CREDS_PASSWORD
+    OVA_DEPLOYER_VSPHERE_DATACENTER
+    OVA_DEPLOYER_VSPHERE_CLUSTER
+    OVA_DEPLOYER_VSPHERE_DATASTORE
+    OVA_DEPLOYER_VSPHERE_NETWORK
+    OVA_DEPLOYER_VSPHERE_FOLDER
+    OVA_DEPLOYER_OVA_PATH
+    OVA_DEPLOYER_OVA_IP
+    OVA_DEPLOYER_OVA_NETMASK
+    OVA_DEPLOYER_OVA_GATEWAY
+    OVA_DEPLOYER_OVA_DNS
+    OVA_DEPLOYER_OVA_NTP_SERVERS
+  ).each do |env_variable|
+    raise "Missing ENV variable #{env_variable}" unless ENV[env_variable]
+  end
+
+  OvaManager::Deployer.new({
+    host:         ENV["OVA_DEPLOYER_VCENTER_CREDS_IP"],
+    user:         ENV["OVA_DEPLOYER_VCENTER_CREDS_USER"],
+    password:     ENV["OVA_DEPLOYER_VCENTER_CREDS_PASSWORD"],
+  }, {
+    datacenter:   ENV["OVA_DEPLOYER_VSPHERE_DATACENTER"],
+    cluster:      ENV["OVA_DEPLOYER_VSPHERE_CLUSTER"],
+    datastore:    ENV["OVA_DEPLOYER_VSPHERE_DATASTORE"],
+    network:      ENV["OVA_DEPLOYER_VSPHERE_NETWORK"],
+    folder:       ENV["OVA_DEPLOYER_VSPHERE_FOLDER"],
+  }).deploy("tpl", ENV["OVA_DEPLOYER_OVA_PATH"], {
+    ip:           ENV["OVA_DEPLOYER_OVA_IP"],
+    netmask:      ENV["OVA_DEPLOYER_OVA_NETMASK"],
+    gateway:      ENV["OVA_DEPLOYER_OVA_GATEWAY"],
+    dns:          ENV["OVA_DEPLOYER_OVA_DNS"],
+    ntp_servers:  ENV["OVA_DEPLOYER_OVA_NTP_SERVERS"],
+  })
+end
