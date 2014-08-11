@@ -1,15 +1,16 @@
-require "tmpdir"
-require "fileutils"
-require "rbvmomi"
-require "rbvmomi/utils/deploy"
-require "open_monkey_patch"
+require 'tmpdir'
+require 'fileutils'
+require 'rbvmomi'
+require 'rbvmomi/utils/deploy'
+require 'vsphere_clients'
+require 'open_monkey_patch'
 
 module OvaManager
   class Deployer
     def initialize(vcenter, location)
       @vcenter = vcenter
       @location = location
-      raise "Target folder must be set" unless @location[:folder]
+      raise 'Target folder must be set' unless @location[:folder]
     end
 
     def deploy(name_prefix, ova_path, ova_config)
@@ -33,7 +34,7 @@ module OvaManager
 
 # Bad idea to redeploy VM over existing running VM
     def check_vm_status(ova_config)
-      log("Checking for existing VM") do
+      log('Checking for existing VM') do
         ip = ova_config[:ip]
         raise "VM exists at #{ip}" if system("ping -c 5 #{ip}")
       end
@@ -48,12 +49,12 @@ module OvaManager
     end
 
     def obtain_ovf_path(dir)
-      raise "Failed to find ovf" unless file_path = Dir["#{dir}/*.ovf"].first
+      raise 'Failed to find ovf' unless file_path = Dir["#{dir}/*.ovf"].first
       "file://#{file_path}"
     end
 
     def deploy_ovf_template(name_prefix, deployer, ovf_path)
-      log("Uploading template") do
+      log('Uploading template') do
         deployer.upload_ovf_as_template(
           ovf_path,
           Time.new.strftime("#{name_prefix}-%F-%H-%M"),
@@ -63,7 +64,7 @@ module OvaManager
     end
 
     def create_vm_from_template(deployer, template)
-      log("Cloning template") do
+      log('Cloning template') do
         deployer.linked_clone(template, "#{template.name}-vm", {
           :numCPUs => 2,
           :memoryMB => 2048,
@@ -73,11 +74,11 @@ module OvaManager
 
     def reconfigure_vm(vm, ova_config)
       ip_configuration = {
-        "ip0" => ova_config[:ip],
-        "netmask0" => ova_config[:netmask],
-        "gateway" => ova_config[:gateway],
-        "DNS" => ova_config[:dns],
-        "ntp_servers" => ova_config[:ntp_servers],
+        'ip0' => ova_config[:ip],
+        'netmask0' => ova_config[:netmask],
+        'gateway' => ova_config[:gateway],
+        'DNS' => ova_config[:dns],
+        'ntp_servers' => ova_config[:ntp_servers],
       }
 
       log("Reconfiguring VM using #{ip_configuration.inspect}") do
@@ -87,7 +88,7 @@ module OvaManager
         # order of OVF template properties.
         ip_configuration.each_with_index do |(key, value), i|
           property_specs << RbVmomi::VIM::VAppPropertySpec.new.tap do |spec|
-            spec.operation = "edit"
+            spec.operation = 'edit'
             spec.info = RbVmomi::VIM::VAppPropertyInfo.new.tap do |p|
               p.key = i
               p.label = key
@@ -97,16 +98,16 @@ module OvaManager
         end
 
         property_specs << RbVmomi::VIM::VAppPropertySpec.new.tap do |spec|
-          spec.operation = "edit"
+          spec.operation = 'edit'
           spec.info = RbVmomi::VIM::VAppPropertyInfo.new.tap do |p|
             p.key = ip_configuration.length
-            p.label = "admin_password"
+            p.label = 'admin_password'
             p.value = ova_config[:vm_password]
           end
         end
 
         vm_config_spec = RbVmomi::VIM::VmConfigSpec.new
-        vm_config_spec.ovfEnvironmentTransport = ["com.vmware.guestInfo"]
+        vm_config_spec.ovfEnvironmentTransport = ['com.vmware.guestInfo']
         vm_config_spec.property = property_specs
 
         vmachine_spec = RbVmomi::VIM::VirtualMachineConfigSpec.new
@@ -116,9 +117,9 @@ module OvaManager
     end
 
     def power_on_vm(vm)
-      log("Powering on VM") do
+      log('Powering on VM') do
         vm.PowerOnVM_Task.wait_for_completion
-        wait_for("VM IP") { vm.guest_ip }
+        wait_for('VM IP') { vm.guest_ip }
       end
     end
 
@@ -137,10 +138,11 @@ module OvaManager
 
       target_folder = datacenter.vmFolder.traverse(location[:folder], RbVmomi::VIM::Folder, true)
 
-      CachedOvfDeployer.new(
+      VsphereClients::CachedOvfDeployer.new(
         connection,
         network,
         cluster,
+        'resource_pool_name',
         target_folder, # template
         target_folder, # vm
         datastore,
@@ -166,13 +168,13 @@ module OvaManager
 
     def system_or_exit(*args)
       puts "--- Running: #{args} @ #{DateTime.now}"
-      system(*args) || fail("FAILED")
+      system(*args) || fail('FAILED')
     end
 
     def wait_for(title, &blk)
       Timeout.timeout(7*60) do
         until value = blk.call
-          puts "--- Waiting for 30 secs"
+          puts '--- Waiting for 30 secs'
           sleep 30
         end
         puts "--- Value obtained for #{title} is #{value}"
