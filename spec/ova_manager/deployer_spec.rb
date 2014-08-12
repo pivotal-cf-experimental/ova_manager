@@ -74,4 +74,24 @@ describe OvaManager::Deployer do
 
     ova_manager_deployer.deploy('foo', ova_path, {ip: '1.1.1.1'})
   end
+
+  context 'when there is no resource pool name' do
+    let(:location){
+      {
+        connection: connection,
+        network: 'network',
+        cluster: 'cluster',
+        folder: 'target_folder',
+        datastore: 'datastore',
+        datacenter: 'datacenter',
+      }
+    }
+
+    it 'fails to find resource pool name' do
+
+      expect{ ova_manager_deployer.deploy('foo', ova_path, {ip: '1.1.1.1'}) }.
+        to raise_error /Failed to find resource_pool_name/
+
+    end
+  end
 end

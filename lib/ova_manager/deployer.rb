@@ -7,6 +7,8 @@ require 'open_monkey_patch'
 
 module OvaManager
   class Deployer
+    attr_reader :location
+
     def initialize(vcenter, location)
       @vcenter = vcenter
       @location = location
@@ -142,11 +144,16 @@ module OvaManager
         connection,
         network,
         cluster,
-        'resource_pool_name',
+        resource_pool_name,
         target_folder, # template
         target_folder, # vm
         datastore,
       )
+    end
+
+    def resource_pool_name
+      return location[:resource_pool_name] if location[:resource_pool_name]
+      fail "Failed to find resource_pool_name'#{location[:resource_pool_name]}'"
     end
 
     def connection
