@@ -5,9 +5,12 @@ require 'ova_manager/deployer'
 describe OvaManager::Deployer do
 
   let(:connection) {double('connection')}
-  let(:cluster) {double('cluster')}
+  let(:cluster) {double('cluster', resourcePool: cluster_resource_pool)}
+  let(:cluster_resource_pool) { double(:cluster_resource_pool, resourcePool: [a_resource_pool, another_resource_pool]) }
+
   let(:a_resource_pool) {double('resource_pool', name: 'resource_pool_name')}
   let(:another_resource_pool) {double('another_resource_pool', name: 'another_resource_pool_name')}
+
   let(:target_folder) {double('target_folder')}
   let(:datastore) {double('datastore')}
   let(:network) {double('network', name: 'network')}
@@ -25,17 +28,6 @@ describe OvaManager::Deployer do
       password: 'secret'
     }
   }
-  let(:location){
-    {
-      connection: connection,
-      network: 'network',
-      cluster: 'cluster',
-      folder: 'target_folder',
-      datastore: 'datastore',
-      datacenter: 'datacenter',
-      resource_pool: 'resource_pool_name'
-    }
-  }
 
   let(:ova_manager_deployer){ OvaManager::Deployer.new(vcenter, location) }
 
@@ -44,10 +36,6 @@ describe OvaManager::Deployer do
     allow(ova_manager_deployer).to receive(:system).with('ping -c 5 1.1.1.1').and_return(false)
 
     allow(datacenter).to receive(:find_compute_resource).with('cluster').and_return(cluster)
-
-    allow(cluster).to receive_message_chain(:resourcePool, :resourcePool).and_return(
-      [a_resource_pool, another_resource_pool]
-    )
 
     allow(datacenter).to receive(:find_datastore).with('datastore').and_return(datastore)
 
@@ -68,17 +56,73 @@ describe OvaManager::Deployer do
                            with('target_folder', RbVmomi::VIM::Folder, true).and_return(target_folder)
   end
 
-  it 'uses VsphereClient::CachedOvfDeployer to deploy an OVA within a resource pool' do
-    expect(VsphereClients::CachedOvfDeployer).to receive(:new).with(
-      connection,
-      network,
-      cluster,
-      a_resource_pool,
-      target_folder,
-      target_folder,
-      datastore
-    ).and_return(cached_ova_deployer)
+  context 'resource pool is a parameter' do
+    let(:location) {
+      {
+        connection: connection,
+        network: 'network',
+        cluster: 'cluster',
+        folder: 'target_folder',
+        datastore: 'datastore',
+        datacenter: 'datacenter',
+        resource_pool: resource_pool_name
+      }
+    }
 
-    ova_manager_deployer.deploy('foo', ova_path, {ip: '1.1.1.1'})
+    context 'resource pool can be found' do
+      let(:resource_pool_name) { a_resource_pool.name }
+
+      it 'uses VsphereClient::CachedOvfDeployer to deploy an OVA within a resource pool' do
+        expect(VsphereClients::CachedOvfDeployer).to receive(:new).with(
+          connection,
+          network,
+          cluster,
+          a_resource_pool,
+          target_folder,
+          target_folder,
+          datastore
+        ).and_return(cached_ova_deployer)
+
+        ova_manager_deployer.deploy('foo', ova_path, { ip: '1.1.1.1' })
+      end
+    end
+
+    context 'resource pool cannot be found' do
+      let(:resource_pool_name) { 'i am no body' }
+
+      it 'uses VsphereClient::CachedOvfDeployer to deploy an OVA within a resource pool' do
+        expect {
+          ova_manager_deployer.deploy('foo', ova_path, { ip: '1.1.1.1' })
+        }.to raise_error /Failed to find resource pool '#{resource_pool_name}'/
+      end
+    end
+  end
+
+
+  context 'when there is no resource pool in location' do
+    let(:location){
+      {
+        connection: connection,
+        network: 'network',
+        cluster: 'cluster',
+        folder: 'target_folder',
+        datastore: 'datastore',
+        datacenter: 'datacenter',
+      }
+    }
+
+    it 'uses the cluster resource pool' do
+      expect(VsphereClients::CachedOvfDeployer).to receive(:new).with(
+        connection,
+        network,
+        cluster,
+        cluster_resource_pool,
+        target_folder,
+        target_folder,
+        datastore
+      ).and_return(cached_ova_deployer)
+
+      ova_manager_deployer.deploy('foo', ova_path, { ip: '1.1.1.1' })
+    end
   end
 end

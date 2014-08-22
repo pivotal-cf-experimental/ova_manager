@@ -142,7 +142,7 @@ module OvaManager
         raise "Failed to find network '#{location[:network]}'"
       end
 
-      unless resource_pool = cluster.resourcePool.resourcePool.find { |rp| rp.name == location[:resource_pool] }
+      unless resource_pool = find_resource_pool(cluster, location[:resource_pool])
         raise "Failed to find resource pool '#{location[:resource_pool]}'"
       end
 
@@ -157,6 +157,14 @@ module OvaManager
         target_folder, # vm
         datastore,
       )
+    end
+
+    def find_resource_pool(cluster, resource_pool_name)
+      if resource_pool_name
+        cluster.resourcePool.resourcePool.find { |rp| rp.name == resource_pool_name }
+      else
+        cluster.resourcePool
+      end
     end
 
     def connection
