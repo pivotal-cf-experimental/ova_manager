@@ -33,7 +33,7 @@ describe OvaManager::Deployer do
       folder: 'target_folder',
       datastore: 'datastore',
       datacenter: 'datacenter',
-      resource_pool_name: 'resource_pool_name'
+      resource_pool: 'resource_pool_name'
     }
   }
 
@@ -44,7 +44,7 @@ describe OvaManager::Deployer do
     allow(ova_manager_deployer).to receive(:system).with('ping -c 5 1.1.1.1').and_return(false)
 
     allow(datacenter).to receive(:find_compute_resource).with('cluster').and_return(cluster)
-    
+
     allow(cluster).to receive_message_chain(:resourcePool, :resourcePool).and_return(
       [a_resource_pool, another_resource_pool]
     )
@@ -80,25 +80,5 @@ describe OvaManager::Deployer do
     ).and_return(cached_ova_deployer)
 
     ova_manager_deployer.deploy('foo', ova_path, {ip: '1.1.1.1'})
-  end
-
-  context 'when there is no resource pool name' do
-    let(:location){
-      {
-        connection: connection,
-        network: 'network',
-        cluster: 'cluster',
-        folder: 'target_folder',
-        datastore: 'datastore',
-        datacenter: 'datacenter',
-      }
-    }
-
-    it 'fails to find resource pool name' do
-
-      expect{ ova_manager_deployer.deploy('foo', ova_path, {ip: '1.1.1.1'}) }.
-        to raise_error /Failed to find resource_pool_name/
-
-    end
   end
 end
