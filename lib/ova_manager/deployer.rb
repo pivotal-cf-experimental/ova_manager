@@ -144,16 +144,16 @@ module OvaManager
         connection,
         network,
         cluster,
-        resource_pool_name,
+        resource_pool,
         target_folder, # template
         target_folder, # vm
         datastore,
       )
     end
 
-    def resource_pool_name
-      return location[:resource_pool_name] if location[:resource_pool_name]
-      fail "Failed to find resource_pool_name'#{location[:resource_pool_name]}'"
+    def resource_pool
+      return location[:resource_pool] if location[:resource_pool]
+      fail "Failed to find resource_pool'#{location[:resource_pool]}'"
     end
 
     def connection
