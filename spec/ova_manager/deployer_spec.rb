@@ -6,6 +6,8 @@ describe OvaManager::Deployer do
 
   let(:connection) {double('connection')}
   let(:cluster) {double('cluster')}
+  let(:a_resource_pool) {double('resource_pool', name: 'resource_pool_name')}
+  let(:another_resource_pool) {double('another_resource_pool', name: 'another_resource_pool_name')}
   let(:target_folder) {double('target_folder')}
   let(:datastore) {double('datastore')}
   let(:network) {double('network', name: 'network')}
@@ -42,6 +44,11 @@ describe OvaManager::Deployer do
     allow(ova_manager_deployer).to receive(:system).with('ping -c 5 1.1.1.1').and_return(false)
 
     allow(datacenter).to receive(:find_compute_resource).with('cluster').and_return(cluster)
+    
+    allow(cluster).to receive_message_chain(:resourcePool, :resourcePool).and_return(
+      [a_resource_pool, another_resource_pool]
+    )
+
     allow(datacenter).to receive(:find_datastore).with('datastore').and_return(datastore)
 
     allow(linked_clone).to receive_message_chain(:ReconfigVM_Task, :wait_for_completion)
@@ -66,7 +73,7 @@ describe OvaManager::Deployer do
       connection,
       network,
       cluster,
-      'resource_pool_name',
+      a_resource_pool,
       target_folder,
       target_folder,
       datastore

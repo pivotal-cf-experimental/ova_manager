@@ -126,17 +126,25 @@ module OvaManager
     end
 
     def build_deployer(location)
-      raise "Failed to find datacenter '#{location[:datacenter]}'" \
       unless datacenter = connection.serviceInstance.find_datacenter(location[:datacenter])
+        raise "Failed to find datacenter '#{location[:datacenter]}'"
+      end
 
-      raise "Failed to find cluster '#{location[:cluster]}'" \
       unless cluster = datacenter.find_compute_resource(location[:cluster])
+        raise "Failed to find cluster '#{location[:cluster]}'"
+      end
 
-      raise "Failed to find datastore '#{location[:datastore]}'" \
       unless datastore = datacenter.find_datastore(location[:datastore])
+        raise "Failed to find datastore '#{location[:datastore]}'"
+      end
 
-      raise "Failed to find network '#{location[:network]}'" \
       unless network = datacenter.network.find { |n| n.name == location[:network] }
+        raise "Failed to find network '#{location[:network]}'"
+      end
+
+      unless resource_pool = cluster.resourcePool.resourcePool.find { |rp| rp.name == resource_pool_name }
+        raise "Failed to find resource pool '#{location[:resource_pool_name]}'"
+      end
 
       target_folder = datacenter.vmFolder.traverse(location[:folder], RbVmomi::VIM::Folder, true)
 
@@ -144,7 +152,7 @@ module OvaManager
         connection,
         network,
         cluster,
-        resource_pool_name,
+        resource_pool,
         target_folder, # template
         target_folder, # vm
         datastore,
