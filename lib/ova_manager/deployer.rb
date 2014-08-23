@@ -142,8 +142,9 @@ module OvaManager
         raise "Failed to find network '#{location[:network]}'"
       end
 
-      unless resource_pool = find_resource_pool(cluster, location[:resource_pool])
-        raise "Failed to find resource pool '#{location[:resource_pool]}'"
+      resource_pool_name = location[:resource_pool] || location[:resource_pool_name]
+      unless resource_pool = find_resource_pool(cluster, resource_pool_name)
+        raise "Failed to find resource pool '#{resource_pool_name}'"
       end
 
       target_folder = datacenter.vmFolder.traverse(location[:folder], RbVmomi::VIM::Folder, true)
