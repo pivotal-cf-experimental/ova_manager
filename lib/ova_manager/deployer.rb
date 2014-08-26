@@ -138,7 +138,7 @@ module OvaManager
         raise "Failed to find datastore '#{location[:datastore]}'"
       end
 
-      unless network = datacenter.network.find { |n| n.name == location[:network] }
+      unless network = datacenter.networkFolder.traverse(location[:network])
         raise "Failed to find network '#{location[:network]}'"
       end
 
