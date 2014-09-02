@@ -37,8 +37,9 @@ module OvaManager
 # Bad idea to redeploy VM over existing running VM
     def check_vm_status(ova_config)
       log('Checking for existing VM') do
-        ip = ova_config[:ip]
-        raise "VM exists at #{ip}" if system("ping -c 5 #{ip}")
+        ip = ova_config[:external_ip] || ova_config[:ip]
+        port = ova_config[:external_port] || 443
+        raise "VM exists at #{ip}" if system("nc -z -G 5 #{ip} #{port}")
       end
     end
 
