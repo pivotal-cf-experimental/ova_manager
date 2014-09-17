@@ -39,7 +39,7 @@ module OvaManager
       log('Checking for existing VM') do
         ip = ova_config[:external_ip] || ova_config[:ip]
         port = ova_config[:external_port] || 443
-        raise "VM exists at #{ip}" if system("nc -z -G 5 #{ip} #{port}")
+        raise "VM exists at #{ip}" if system("nc -z -w 5 #{ip} #{port}")
       end
     end
 
