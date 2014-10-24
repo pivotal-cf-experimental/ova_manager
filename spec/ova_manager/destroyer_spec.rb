@@ -11,6 +11,7 @@ module OvaManager
       it "is wired up correctly" do
         connection = double("connection", serviceInstance: double("serviceInstance"))
         datacenter = double("datacenter")
+        allow(datacenter).to receive(:is_a?).with(RbVmomi::VIM::Datacenter).and_return(true)
         vm_folder_client = double("vm_folder_client")
 
         expect(RbVmomi::VIM).to receive(:connect).with(
@@ -20,9 +21,16 @@ module OvaManager
           ssl: true,
           insecure: true,
         ).and_return(connection)
-        expect(connection.serviceInstance).to receive(:find_datacenter).with("datacenter_name").and_return(datacenter)
-        expect(VsphereClients::VmFolderClient).to receive(:new).with(datacenter, instance_of(Logger)).and_return(vm_folder_client)
-
+        expect(connection).to receive(:searchIndex).and_return(
+          double(:searchIndex).tap do |search_index|
+            expect(search_index).to receive(:FindByInventoryPath).
+              with(inventoryPath: "datacenter_name").
+              and_return(datacenter)
+          end
+        )
+        expect(VsphereClients::VmFolderClient).to receive(:new).
+          with(datacenter, instance_of(Logger)).
+          and_return(vm_folder_client)
         expect(vm_folder_client).to receive(:delete_folder).with("folder_name")
         expect(vm_folder_client).to receive(:create_folder).with("folder_name")
 

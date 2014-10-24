@@ -21,7 +21,9 @@ module OvaManager
     end
 
     def datacenter
-      connection.serviceInstance.find_datacenter(@datacenter_name)
+      match = connection.searchIndex.FindByInventoryPath(inventoryPath: @datacenter_name)
+      return unless match and match.is_a?(RbVmomi::VIM::Datacenter)
+      match
     end
 
     def connection
