@@ -50,10 +50,19 @@ describe OvaManager::Deployer do
                                                     insecure: true
                                                   }).and_return connection
 
-    allow(connection).to receive_message_chain(:serviceInstance, :find_datacenter).with('datacenter').and_return(datacenter)
+    allow(connection).to receive(:serviceInstance).and_return(
+      double(:serviceInstance).tap do |service_instance|
+        allow(service_instance).to receive(:find_datacenter).with('datacenter').and_return(datacenter)
+      end
+    )
 
     allow(datacenter).to receive_message_chain(:vmFolder, :traverse).
                            with('target_folder', RbVmomi::VIM::Folder, true).and_return(target_folder)
+    allow(datacenter).to receive(:networkFolder).and_return(
+      double(:networkFolder).tap do |network_folder|
+        allow(network_folder).to receive(:traverse).with('network').and_return(network)
+      end
+    )
   end
 
   context 'resource pool is a parameter' do
