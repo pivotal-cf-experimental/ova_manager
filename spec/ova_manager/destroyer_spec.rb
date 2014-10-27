@@ -3,8 +3,8 @@ require "ova_manager/destroyer"
 
 module OvaManager
   describe Destroyer do
-    subject(:destroyer) { described_class.new("datacenter_name", vcenter) }
-    let(:vcenter) { { host: "host", user: "user", password: "password" } }
+    subject(:destroyer) { Destroyer.new("datacenter_name", vcenter_config) }
+    let(:vcenter_config) { { host: "host", user: "user", password: "password" } }
 
     describe "#clean_folder" do
       # Crappy temporary test to at least ensure that Destroyer requires the appropriate files

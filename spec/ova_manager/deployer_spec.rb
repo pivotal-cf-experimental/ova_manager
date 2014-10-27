@@ -21,7 +21,7 @@ describe OvaManager::Deployer do
   let(:template) { double('template', name: 'template name') }
   let(:ova_path) {File.join('spec','fixtures','foo.ova')}
   let(:linked_clone) {double('linked clone', guest_ip: '1.1.1.1')}
-  let(:vcenter) {
+  let(:vcenter_config) {
     {
       host: 'foo',
       user: 'bar',
@@ -29,11 +29,11 @@ describe OvaManager::Deployer do
     }
   }
 
-  let(:ova_manager_deployer){ OvaManager::Deployer.new(vcenter, location) }
+  let(:ova_manager_deployer){ OvaManager::Deployer.new(vcenter_config, location) }
 
   before do
-    allow(ova_manager_deployer).to receive(:system).and_call_original
-    allow(ova_manager_deployer).to receive(:system).with('ping -c 5 1.1.1.1').and_return(false)
+    allow(ova_manager_deployer).to receive(:system).with(/cd .* && tar xfv .*/).and_call_original
+    allow(ova_manager_deployer).to receive(:system).with(/nc -z -w 5 .* 443/).and_return(false)
 
     allow(datacenter).to receive(:find_compute_resource).with('cluster').and_return(cluster)
 
@@ -43,9 +43,9 @@ describe OvaManager::Deployer do
     allow(linked_clone).to receive_message_chain(:PowerOnVM_Task, :wait_for_completion)
 
     allow(RbVmomi::VIM).to receive(:connect).with({
-                                                    host:     vcenter[:host],
-                                                    user:     vcenter[:user],
-                                                    password: vcenter[:password],
+                                                    host:     vcenter_config[:host],
+                                                    user:     vcenter_config[:user],
+                                                    password: vcenter_config[:password],
                                                     ssl:      true,
                                                     insecure: true
                                                   }).and_return connection
@@ -106,7 +106,6 @@ describe OvaManager::Deployer do
       end
     end
   end
-
 
   context 'when there is no resource pool in location' do
     let(:location){
