@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "ova_manager"
-  spec.version       = "0.0.2"
+  spec.version       = "0.1.0"
   spec.authors       = ""
   spec.summary       = "CLI tools to deploy/delete an OVA to vSphere"
 
