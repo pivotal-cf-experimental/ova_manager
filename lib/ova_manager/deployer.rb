@@ -3,14 +3,15 @@ require 'fileutils'
 require 'rbvmomi'
 require 'rbvmomi/utils/deploy'
 require 'vsphere_clients'
+require 'ova_manager/base'
 require 'open_monkey_patch'
 
 module OvaManager
-  class Deployer
+  class Deployer < Base
     attr_reader :location
 
     def initialize(vcenter, location)
-      @vcenter = vcenter
+      super(vcenter)
       @location = location
       raise 'Target folder must be set' unless @location[:folder]
     end
@@ -127,7 +128,7 @@ module OvaManager
     end
 
     def build_deployer(location)
-      unless datacenter = connection.serviceInstance.find_datacenter(location[:datacenter])
+      unless datacenter = find_datacenter(location[:datacenter])
         raise "Failed to find datacenter '#{location[:datacenter]}'"
       end
 
@@ -151,7 +152,7 @@ module OvaManager
       target_folder = datacenter.vmFolder.traverse(location[:folder], RbVmomi::VIM::Folder, true)
 
       VsphereClients::CachedOvfDeployer.new(
-        connection,
+        logged_connection,
         network,
         cluster,
         resource_pool,
@@ -169,16 +170,8 @@ module OvaManager
       end
     end
 
-    def connection
-      log("connecting to #{@vcenter[:user]}@#{@vcenter[:host]}") do
-        @connection ||= RbVmomi::VIM.connect(
-          host: @vcenter[:host],
-          user: @vcenter[:user],
-          password: @vcenter[:password],
-          ssl: true,
-          insecure: true,
-        )
-      end
+    def logged_connection
+      log("connecting to #{@vcenter[:user]}@#{@vcenter[:host]}") { connection }
     end
 
     def log(title, &blk)
