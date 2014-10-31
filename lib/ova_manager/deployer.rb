@@ -193,7 +193,7 @@ module OvaManager
         puts "--- Value obtained for #{title} is #{value}"
         value
       end
-    rescue Timeout::Error => e
+    rescue Timeout::Error
       puts "--- Timed out waiting for #{title}"
       raise
     end

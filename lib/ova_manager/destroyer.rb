@@ -1,7 +1,7 @@
-require "rbvmomi"
-require "logger"
-require "vsphere_clients/vm_folder_client"
-require "ova_manager/base"
+require 'rbvmomi'
+require 'logger'
+require 'vsphere_clients/vm_folder_client'
+require 'ova_manager/base'
 
 module OvaManager
   class Destroyer < Base

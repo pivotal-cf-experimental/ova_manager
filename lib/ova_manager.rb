@@ -1,2 +1,2 @@
-require "ova_manager/deployer"
-require "ova_manager/destroyer"
+require 'ova_manager/deployer'
+require 'ova_manager/destroyer'

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-require "ova_manager/destroyer"
+require 'ova_manager/destroyer'
 
 if __FILE__ ==  $0
   %w(
@@ -12,11 +12,11 @@ if __FILE__ ==  $0
   end
 
   OvaManager::Destroyer.new(
-    ENV["OVA_DEPLOYER_VSPHERE_DATACENTER"],
+    ENV['OVA_DEPLOYER_VSPHERE_DATACENTER'],
     {
-      host: ENV["OVA_DEPLOYER_VCENTER_CREDS_IP"],
-      user: ENV["OVA_DEPLOYER_VCENTER_CREDS_USER"],
-      password: ENV["OVA_DEPLOYER_VCENTER_CREDS_PASSWORD"],
+      host: ENV['OVA_DEPLOYER_VCENTER_CREDS_IP'],
+      user: ENV['OVA_DEPLOYER_VCENTER_CREDS_USER'],
+      password: ENV['OVA_DEPLOYER_VCENTER_CREDS_PASSWORD'],
     }
-  ).clean_folder(ENV["OVA_DEPLOYER_VSPHERE_FOLDER"])
+  ).clean_folder(ENV['OVA_DEPLOYER_VSPHERE_FOLDER'])
 end

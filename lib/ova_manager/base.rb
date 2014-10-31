@@ -1,4 +1,4 @@
-require "rbvmomi"
+require 'rbvmomi'
 
 module OvaManager
   class Base

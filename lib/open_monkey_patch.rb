@@ -8,7 +8,7 @@ module Kernel
   end
 
   def open(name, *rest, &blk)
-    name = name[7..-1] if name.start_with?("file://")
+    name = name[7..-1] if name.start_with?('file://')
     open_without_file(name, *rest, &blk)
   end
 end
